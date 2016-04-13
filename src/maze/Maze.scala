@@ -15,17 +15,16 @@ class Maze {
   
   val _shuf = 0.3
   
-  val _rooms = 100 //number of times we attempt to place a room
-  val _roomSize = 5 //average size of a room (n x n)
-  val _roomVar = 1 //the variance in room sizes
+  val _rooms = 1200 //number of times we attempt to place a room
+  val _roomSize = 10 //average size of a room (n x n)
+  val _roomVar = 5 //the variance in room sizes
   
   val _removals = 50 //number of dead-ends to remove from maze
   
   def generate(grid:Grid) : Grid = {
     
     //The recursive randomized DFS call
-    def makePaths(co:Coord, floors:Floors) : Floors = {
-      
+    def makePaths(co:Coord, prev:Coord, floors:Floors) : Floors = {
       
       //Randomly shuffle a list.. used for randomizing the carving strategy
       def chanceShuffle(odds:Double, list:List[Int]):List[Int] = {
@@ -36,10 +35,10 @@ class Maze {
       }
       
       def getDirection():Int = {
-        if      (floors.contains((co._1 - 1, co._2))) 2 //going down
-        else if (floors.contains((co._1, co._2+1)))   3  //going left
-        else if (floors.contains((co._1 + 1, co._2))) 0  //going up
-        else if (floors.contains((co._1, co._2-1)))   1  //going right
+        if      (prev == (co._1 - 1, co._2)) 2 //going down
+        else if (prev == (co._1, co._2+1))   3  //going left
+        else if (prev == (co._1 + 1, co._2)) 0  //going up
+        else if (prev == (co._1, co._2-1))   1  //going right
         else scala.util.Random.nextInt(4)
       }
       val direc = getDirection() //since this might be random, get it once only
@@ -51,23 +50,24 @@ class Maze {
         return d :: filt
       }
       
-      def validFloor(p:Coord, n:Int):Boolean = (surroundingFloors(p, floors, grid).size < n && isValidCoord(p, grid) && !floors.contains(p))
+      //p: Point tested, n: Max number of neighboring floors allowed
+      def validFloor(p:Coord, n:Int, fl:Floors):Boolean = (surroundingFloors(p, fl, grid).size <= n && isValidCoord(p, grid) && !fl.contains(p))
       
-      //Draw two floors at a time... this is the second point
-      val sp = cast(direc, co)
-      
-      if (validFloor(co,2) && validFloor(sp,1)/* && validFloor(tp,1)*/) {
-        val f0 = /*tp :: */sp :: co :: floors //add the first and second points to the floors list (i.e. "visited")
-        
+      if (validFloor(co,0,floors) && (validFloor(prev,1,floors) || prev == ErrCoord)) {
+        val f0 = (if (prev != ErrCoord) List(prev, co) else List(co)) ++ floors //add the first and second points to the floors list (i.e. "visited")
+
         //Code for displaying maze while generating
-        println(print(carve(f0, grid)))
-        Thread.sleep(3L);
+//        println(print(carve(f0, grid)))
+//        Thread.sleep(3L);
         
-        //Randomize next direction
+        //Randomize direction priority based on shuffle chance (_shuf)
         val dirs = chanceShuffle(_shuf, carvingStrategy())
-        val casts = List(cast(dirs(0), sp), cast(dirs(1), sp), cast(dirs(2), sp), cast(dirs(3), sp))
-                      .filter(c => (surroundingFloors(c, f0, grid).size < 2 && isValidCoord(c, grid) && !f0.contains(c)))         
-        return casts.foldLeft(f0)((f, t) => makePaths(t, f))
+        val casts = List((cast2(dirs(0), co), cast(dirs(0), co)), 
+                         (cast2(dirs(1), co), cast(dirs(1), co)), 
+                         (cast2(dirs(2), co), cast(dirs(2), co)), 
+                         (cast2(dirs(3), co), cast(dirs(3), co)))
+                      .filter(c => (validFloor(c._1, 0, f0) && validFloor(c._2, 1, f0)))         
+        return casts.foldLeft(f0)((f, t) => makePaths(t._1, t._2, f))
       }
       else
         return floors
@@ -123,7 +123,7 @@ class Maze {
       if (w.isEmpty) 
         (f, regs) //base case
       else {
-        val res = makePaths(w(0), f) //carve paths
+        val res = makePaths(w(0), ErrCoord, f) //carve paths
         //if no new paths were made, move to next wall  
         val path = res.filter(!f.contains(_))
         if (path.isEmpty) 
@@ -225,6 +225,7 @@ class Maze {
   
   //Get the neighboring coordinate given a direction
   def cast(d:Int, co:Coord): Coord = (co._1 + dir(d)._1, co._2 + dir(d)._2)
+  def cast2(d:Int, co:Coord): Coord = cast(d, cast(d, co))
   
   //Pokes a hole in the Grid (used for placing floors for the 2D array representation)
   def poke(co:Coord, g:Grid): Grid = {
