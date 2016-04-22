@@ -9,6 +9,7 @@ Project Description
 The goal for this project is to *randomly* generate a large, winding, maze-like dungeon with a start and end point. The maze is a series of walls and floors, where all the floors are guaranteed to be perfectly connected (i.e. every floor space is guaranteed to be accessible). The generated dungeon is then used to generate geometry, which is finally output into .obj files containing vertex, normal, and texture coordinates. These will be used to render the maze as a series of 3D walls and floors.
 
 This dungeon should include several options to fine-tune the look and feel of the dungeon.
+
 1. The size of the maze (width & height).
 2. How many "rooms" to generate within the maze.
 3. How many dead-ends to leave in the maze.
@@ -53,6 +54,7 @@ After the rooms are placed, the generator fills up the spaces between the rooms 
 
 To adhere to these rules, a simple algorithm was developed. Using a somewhat randomized depth-first search, the corridors start drawing from the first eligible point it can find. "Eligible" in this context means a space with no other neighboring floors. From the point, it picks a direction priority (up, down, left, or right), and draws in each direction in order, depth-first.
 > Note: The direction priority selection is influenced by the "winding" factor supplied in the command-line arguments. The winding factor dictates how likely the maze is to pick a random new direction rather than remain in a straight line. So if the winding factor is 75, the maze will prioritize the same direction 25% of the time.
+
 When drawing the next corridor, it picks the next two spaces in that direction, and determines if they are eligible spaces. If either point is not eligible, it gives up on drawing in that direction and proceeds to draw in the next direction in the list. Once the generator can no longer draw any floors anywhere -- that is, ALL eligible spaces are filled with corridors -- the maze is done drawing corridors.
 
 One of the challenges in making the maze look *nice* is determining how to draw the maze in a way that only leaves at most one space between the walls. The solution is to draw only on odd-numbered room sizes, and begin drawing corridors on odd-numbered coordinate points. This will leave a nice border of walls around the floors, a single-wall thick. This, naturally, is somewhat abandoned in the final step of the algorithm, but fortunately the *niceness* is still preserved.
@@ -60,6 +62,7 @@ One of the challenges in making the maze look *nice* is determining how to draw 
 ####Connecting regions
 Now that all the spaces are filled in, the generator is made to **guarantee** that all floors within the maze are made perfectly connected (all floors can be accessed from any other floor one way or another). To do this, the generator finds all connected *Regions*. A Region in this context is a set of floors where each floor can be accessed from every other floor in the set.
 > Note: The generator actually keeps track of the maze regions while the maze is being generated. Since the rooms are already guaranteed not to overlap, and the corridors drawn are guaranteed not to intersect with any other floors, each room and set of corridors are therefore individual regions.
+
 With a list of Regions, the generator then works on connecting the regions. It starts with the smallest regions first, and then works up from there. First, it finds a list of eligible "border" points in the Region, which is the floors that have at least one bordering wall (or, in this case, the floors that do *not* have four surrouding floors). Then, it attempts to *cast* through the bordering walls and attempts to find a floor within another region. If it manages to find a floor belonging to another region, those regions are then joined together, with a floor joining the two together. The process then repeats, until all the Regions are joined together into one big Region.
 
 ####Trimming dead-ends
