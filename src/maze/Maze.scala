@@ -1,29 +1,29 @@
 package maze
 
-class Maze {
+class Maze(_width:Int, _height:Int, _shuf:Double, _rooms:Int, _roomSize:Int, _roomVar:Int, _removals:Int) {
   
-  type Grid = Array[Array[Space]]
+  type Grid = Array[Array[Boolean]]
   type Coord = (Int, Int)
   type Floors = List[Coord]
   type Walls = List[Coord]
   type Regions = List[Floors]
+  type Size = (Int, Int)
   
   val Dirs = List(0,1,2,3)
   val ErrCoord = (-1, -1)
   
   val _rand = scala.util.Random
   
-  val _shuf = 0.3
+  //val _size = (_width, _height)
   
-  val _rooms = 1200 //number of times we attempt to place a room
-  val _roomSize = 10 //average size of a room (n x n)
-  val _roomVar = 5 //the variance in room sizes
-  
-  val _removals = 50 //number of dead-ends to remove from maze
-  
-  def generate(grid:Grid) : Grid = {
+  //Generates a dungeon of rooms and corridors.
+  def generate() : Floors = {
+    //Get an odd-aligned point in the maze
+    def randomPoint(w:Int, h:Int): Coord = {
+      (_rand.nextInt((w-1)/2)*2 + 1, _rand.nextInt((h-1)/2)*2 + 1)
+    }
     
-    //The recursive randomized DFS call
+    //Create corridors. A randomized variation of DFS.
     def makePaths(co:Coord, prev:Coord, floors:Floors) : Floors = {
       
       //Randomly shuffle a list.. used for randomizing the carving strategy
@@ -42,7 +42,7 @@ class Maze {
         else scala.util.Random.nextInt(4)
       }
       val direc = getDirection() //since this might be random, get it once only
-      
+
       //Our strategy is: If we are carving in a specific direction, tend towards that direction
       def carvingStrategy():List[Int] = {
         val d = direc
@@ -51,12 +51,13 @@ class Maze {
       }
       
       //p: Point tested, n: Max number of neighboring floors allowed
-      def validFloor(p:Coord, n:Int, fl:Floors):Boolean = (surroundingFloors(p, fl, grid).size <= n && isValidCoord(p, grid) && !fl.contains(p))
+      def validFloor(p:Coord, n:Int, fl:Floors):Boolean = (surroundingFloors(p, fl).size <= n && isValidCoord(p) && !fl.contains(p))
       
       if (validFloor(co,0,floors) && (validFloor(prev,1,floors) || prev == ErrCoord)) {
         val f0 = (if (prev != ErrCoord) List(prev, co) else List(co)) ++ floors //add the first and second points to the floors list (i.e. "visited")
 
         //Code for displaying maze while generating
+//        System.out.print("\033\143")
 //        println(print(carve(f0, grid)))
 //        Thread.sleep(3L);
         
@@ -73,11 +74,7 @@ class Maze {
         return floors
     }
     
-    //Get an even-numbered point in the maze
-    def randomPoint(w:Int, h:Int): Coord = {
-      (_rand.nextInt((w-1)/2)*2 + 1, _rand.nextInt((h-1)/2)*2 + 1)
-    }
-    
+    //Place generated rooms.
     def placeRooms(num:Int, floors:Floors):(Floors, List[List[Coord]]) = {
       
       def room(f:Floors):Floors = {
@@ -85,14 +82,14 @@ class Maze {
         val wv = _roomSize + (_rand.nextInt(_roomVar) * (if (_rand.nextBoolean()) -1 else 1))
         val h = hv-(1-(hv%2))
         val w = wv-(1-(wv%2)) //always odd room size
-        val row = _rand.nextInt((grid.length - 1 - h) / 2)*2 + 1 //always odd row/col
-        val col = _rand.nextInt((grid(0).length - 1 - w)/2)*2 + 1
+        val row = _rand.nextInt((_height - 1 - h) / 2)*2 + 1 //always odd row/col
+        val col = _rand.nextInt((_width - 1 - w)/2)*2 + 1
         
         val rm = (0 to h-1).toList.foldLeft(List[Coord]())((l, r) => {
           (0 to w-1).toList.foldLeft(l)((l, c) => {
             (r+row, c+col) :: l
           })
-        }).filter((c) => isValidCoord(c, grid))
+        }).filter((c) => isValidCoord(c))
         
         //points = walls around the room that should also not intersect with rooms (i.e. we don't want rooms touching)
         val points =  ((-1 to h+1).toList.foldLeft(List[Coord]())((l,v) => (row+v, col-1  )::l)
@@ -117,10 +114,10 @@ class Maze {
       return recur(num, floors, List())
     }
     
-    //find inter-connected regions in the maze
+    //Start carving corridors in the maze, making sure not to overlap any other floors
+    // Each contiguous set of floors is maintained as an individual Region
     def makeRegions(w:Walls, f:Floors, regs:Regions):(Floors,Regions) = {
-      //println("make regions:\n"+w)
-      if (w.isEmpty) 
+      if (w.isEmpty)
         (f, regs) //base case
       else {
         val res = makePaths(w(0), ErrCoord, f) //carve paths
@@ -129,16 +126,9 @@ class Maze {
         if (path.isEmpty) 
           makeRegions(w.drop(1), f, regs) //path.isEmpty == unable to draw any floors at this wall.
         else 
-          makeRegions(w.filter(!path.contains(_)).filter(surroundingFloors(_, res, grid).size < 1), res, regs :+ path)
+          makeRegions(w.filter(!path.contains(_)).filter(surroundingFloors(_, res).size < 1), res, regs :+ path)
       }
-    }
-        
-    def carve(floors:Floors, grid:Grid):Grid = {
-      if (floors.isEmpty) return grid
-      else return carve(floors.drop(1), poke(floors(0), grid))
-    }
-    
-    
+    }    
     
     //Connect them
     def connectRegions(f:Floors, regs:Regions): Floors = {
@@ -164,7 +154,6 @@ class Maze {
             val p = castThru(list(0), _rand.shuffle(Dirs));
             if (p._2 == ErrCoord) findNeighbor(list.drop(1))
             else {
-              //println("Found neighbor: "+p)
               return p
             }
             
@@ -180,7 +169,7 @@ class Maze {
         }
         
         //Eligible points: points that border a wall
-        val elig = _rand.shuffle(r.filter(surroundingFloors(_, f, grid).size < 4)) //points eligible to connect
+        val elig = _rand.shuffle(r.filter(surroundingFloors(_, f).size < 4)) //points eligible to connect
         val neigh = findNeighbor(elig)
         val reg = findRegion(neigh._1, regs)
         if (neigh._1 != ErrCoord)
@@ -196,29 +185,79 @@ class Maze {
       }
     }
     
+    def trimEnds(f:Floors, n:Int):Floors = {
+      val elig = f.filter(surroundingFloors(_, f).size < 2)
+      if (elig.size == 0) return f //possible base case
+      
+      def doTrim(ends:Floors, fl:Floors, num:Int): (Floors, Int) = {
+        if (ends.isEmpty || num == 0) return (fl, num)
+        else {
+//          System.out.print("\033\143")
+//          println(print(carve(fl, grid)))
+//          Thread.sleep(3L);
+          
+          return doTrim(ends.drop(1), fl.filter(_ != ends(0)), num-1)
+        }
+      }
+      val trim = doTrim(elig, f, n)
+      
+      if (trim._2 == 0) return trim._1 //another possible base case
+      else return trimEnds(trim._1, trim._2)
+    }
+    println("Width:"+_width + ", Height:"+_height+", Tiles:"+_width*_height)
+    
     val rooms = placeRooms(_rooms, List())
     val floors = rooms._1
     val regions = rooms._2
+    println("Floors:"+floors.size)
     //after placing rooms, iterate through all remaining wall pieces and start making corridors
-    val walls = (0 to (grid.length/2)-1).toList.foldLeft(List[Coord]())((l, r) => {
-        (0 to (grid(0).length/2)-1).toList.foldLeft(l)((l, c) => {
+    val walls = (0 to (_height/2)-1).toList.foldLeft(List[Coord]())((l, r) => {
+        (0 to (_width/2)-1).toList.foldLeft(l)((l, c) => {
            l :+ (r*2 + 1, c*2 + 1)
         })
       })
       .filter(!floors.contains(_))
-      .filter(surroundingFloors(_, floors, grid).size < 1)
+      .filter(surroundingFloors(_, floors).size < 1)
     
     val maze = makeRegions(walls, floors, regions)
-    
-    //Return the result as a 2d array
+    println("Maze floors:"+maze._1.size)
     val conn = connectRegions(maze._1, maze._2.sortBy(_.size))
-    return carve(conn, grid)
-  }  
+    println("Connected floors:"+conn.size)
+    return trimEnds(conn, _removals)
+    
+  }
+  
+  def getMesh(fl:Floors, wa:Walls):(Geom.Obj, Geom.Obj) = {     
+    val floors = fl.foldLeft((Geom.emptyObj, 0))((obj, co) => {
+      val o = Geom.floorObj(co._1, 0, co._2, _width, _height, obj._2)
+      ((obj._1._1 ++ o._1, obj._1._2 ++ o._2, obj._1._3 ++ o._3, obj._1._4 ++ o._4), obj._2+1)
+    })
+    
+    val walls = wa.foldLeft((Geom.emptyObj, 0))((obj, co) => {
+      val o = Geom.cubeObj(co._1, 0, co._2, _width, _height, obj._2)
+      ((obj._1._1 ++ o._1, obj._1._2 ++ o._2, obj._1._3 ++ o._3, obj._1._4 ++ o._4), obj._2+1)
+    })
+    
+    (floors._1, walls._1)
+  }
+  
+  def getWalls(f:Floors):Walls = {
+    (0 to (_height)-1).toList.foldLeft(List[Coord]())((l, r) => {
+        (0 to (_width)-1).toList.foldLeft(l)((l, c) => {
+           l :+ (r, c)
+        })
+      })
+      .filter(!f.contains(_))
+  }
    
   //Helpers below here
-    
+  //val grid = build(_width, _height, Array())
+  def carve(floors:Floors, grid:Grid):Grid = {
+    if (floors.isEmpty) return grid
+    else return carve(floors.drop(1), poke(floors(0), grid))
+  }
   //Tests if the coordinate is within the boundaries of the maze
-  def isValidCoord(co:Coord, g:Grid):Boolean = (!(co._1 < 1 || co._1 > g.length - 2 || co._2 < 1 || co._2 > g(0).length - 2))
+  def isValidCoord(co:Coord):Boolean = (!(co._1 < 1 || co._1 > _height - 2 || co._2 < 1 || co._2 > _width - 2))
   
   //Create a Coord based off an Int. 0 = Up, 1 = Right, 2 = Down, 3 = Left
   def dir(d:Int):Coord = (if (d == 1 || d == 3) 0 else if (d == 0) -1 else 1, if (d == 0 || d == 2) 0 else if (d == 1) 1 else -1)
@@ -230,20 +269,28 @@ class Maze {
   //Pokes a hole in the Grid (used for placing floors for the 2D array representation)
   def poke(co:Coord, g:Grid): Grid = {
     if (co._1 > 0 && co._2 > 0 && co._1 < g.length && co._2 < g(0).length)
-      g.updated(co._1, g(co._1).updated(co._2, new Space(false)))
+      g.updated(co._1, g(co._1).updated(co._2, false))
     else g
   }
   
   //Create a new Grid filled with walls
-  def build(w:Int, h:Int, g:Grid) : Grid = Array.fill(h)(Array.fill(w)(new Space(true)))
+  def build() : Grid = Array.fill(_height)(Array.fill(_width)(true))
   
   //Prints the spaces within the Grid row by row
-  def print(g:Grid) = g.foldLeft("")((s, r) => s + "\n" + r.mkString(""))
+  def print(g:Grid) = g.foldLeft("")((s, r) => s + "\n" + r.foldLeft("")((st, sp) => st + (if (sp) "\u2593" else "\u2591")))
+  
+  //Get a string representation of all walls, represented as coordinates
+  // The first two numbers in the string are the x/y width/height of the maze.
+  def dataString(wa:Walls, w:Int, h:Int):String = {
+    wa.foldLeft(w+" "+h)((str, sp) => {
+      str + "\n" + sp._1 + " " + sp._2 
+    })
+  }
   
   //Gets a list of floors that surround a space
-  def surroundingFloors(c:Coord, f:Floors, grid:Grid):Floors = {
+  def surroundingFloors(c:Coord, f:Floors):Floors = {
     val dirs = List(0,1,2,3);
     List(cast(dirs(0), c), cast(dirs(1), c), cast(dirs(2), c), cast(dirs(3), c))
-      .filter(d => (isValidCoord(d, grid) && f.contains(d)))
+      .filter(d => (isValidCoord(d) && f.contains(d)))
   }
 }

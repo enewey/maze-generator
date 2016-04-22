@@ -5,3 +5,6 @@ bin/*
 .settings/
 .project
 *target/
+*.DS_Store
+*.mdf
+*.obj
