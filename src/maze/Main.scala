@@ -10,28 +10,6 @@ object Main {
     val height = a(1)
     val m = new Maze(width, height, a(2)/100.0, a(3), a(4), a(5), a(6));
     
-    
-    
-//    val testF = List((0,0), (1,1), (2,0), (0,2), (2,2))
-//    val testW = List((1,0), (0,1), (2,1), (1,2))
-//    val testMesh = m.getMesh(testF, testW) 
-//    val tpw = new PrintWriter(new File("testfloor_data.obj"))
-//    tpw.write( Geom.objGeomString(testMesh._1) + 
-//        "\n" + Geom.objTexString(testMesh._1) + 
-//        "\n" + Geom.objNormString(testMesh._1) + 
-//        "\n" + Geom.objFaceString(testMesh._1))  
-//    tpw.close
-//  
-//    val tppw = new PrintWriter(new File("testwall_data.obj"))
-//    tppw.write(Geom.objGeomString(testMesh._2) + 
-//        "\n" + Geom.objTexString(testMesh._2) + 
-//        "\n" + Geom.objNormString(testMesh._2) + 
-//        "\n" + Geom.objFaceString(testMesh._2))
-//    tppw.close
-    
-    
-    
-    
     val paths = m.generate();
     println(m.print(m.carve(paths, m.build())));
     println("Press enter to write maze to file(s)...")

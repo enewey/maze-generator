@@ -8,8 +8,6 @@ object Geom {
   type Vec3 = (Float, Float, Float)
   type Face = (Triplet, Triplet, Triplet)
   type Triplet = (Int, Int, Int)
-  type Triangle = (Vec3, Vec3, Vec3)
-  type TextureTri = (Vec2, Vec2, Vec2)
   type Obj = (List[Vec3], List[Vec2], List[Vec3], List[Face]) //geometry, uvs, normals, faces
   
   def emptyObj = (List[Vec3](), List[Vec2](), List[Vec3](), List[Face]())
@@ -29,18 +27,18 @@ object Geom {
     val v5 = ((1.0f+x), -1.0f+y, (-1.0f+z))
     val v6 = ((1.0f+x), 1.0f+y,  (-1.0f+z))
     val v7 = ((-1.0f+x),1.0f+y,  (-1.0f+z))
-    
-    val n0 = (0.0f,  0.0f,  1.0f)
-    val n1 = (0.0f,  1.0f,  0.0f)
-    val n2 = (0.0f,  0.0f,  -1.0f)
-    val n3 = (-1.0f, 0.0f,  0.0f)
-    val n4 = (0.0f,  -1.0f, 0.0f)
-    val n5 = (1.0f,  0.0f,  0.0f)
-    
+        
     val t0 = (0.0f, 0.0f)
     val t1 = (1.0f, 0.0f)
     val t2 = (1.0f, 1.0f)
     val t3 = (0.0f, 1.0f)
+    
+    val n0 = (0.0f+x,  0.0f+y,  1.0f+z)
+    val n1 = (0.0f+x,  1.0f+y,  0.0f+z)
+    val n2 = (0.0f+x,  0.0f+y,  -1.0f+z)
+    val n3 = (-1.0f+x, 0.0f+y,  0.0f+z)
+    val n4 = (0.0f+x,  -1.0f+y, 0.0f+z)
+    val n5 = (1.0f+x,  0.0f+y,  0.0f+z)
     
     val geometry = List(v0, v1, v2, v3, v4, v5, v6, v7)
     val uvs = List(t0, t1, t2, t3)
@@ -82,12 +80,12 @@ object Geom {
     val v2 = ((1.0f+x), -1.0f+y, (-1.0f+z))
     val v3 = ((-1.0f+x), -1.0f+y, (-1.0f+z))
     
-    val n0 = (0.0f, 1.0f, 0.0f)
-    
     val t0 = (0.0f, 0.0f)
     val t1 = (1.0f, 0.0f)
     val t2 = (1.0f, 1.0f)
     val t3 = (0.0f, 1.0f)
+    
+    val n0 = (0.0f+x, 1.0f+y, 0.0f+z)
     
     val geometry = List(v0, v1, v2, v3)
     val uvs = List(t0, t1, t2, t3)

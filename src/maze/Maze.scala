@@ -2,12 +2,11 @@ package maze
 
 class Maze(_width:Int, _height:Int, _shuf:Double, _rooms:Int, _roomSize:Int, _roomVar:Int, _removals:Int) {
   
-  type Grid = Array[Array[Boolean]]
+  type Grid = Array[Array[Boolean]] //Mostly un-used... artifact of an old representation of the maze
   type Coord = (Int, Int)
   type Floors = List[Coord]
-  type Walls = List[Coord]
+  type Walls = Floors //Same as floors, for the sake of clarity in the code
   type Regions = List[Floors]
-  type Size = (Int, Int)
   
   val Dirs = List(0,1,2,3)
   val ErrCoord = (-1, -1)
@@ -227,6 +226,7 @@ class Maze(_width:Int, _height:Int, _shuf:Double, _rooms:Int, _roomSize:Int, _ro
     
   }
   
+  //Get the geometry of the floors and walls, organized respectively as a tuple
   def getMesh(fl:Floors, wa:Walls):(Geom.Obj, Geom.Obj) = {     
     val floors = fl.foldLeft((Geom.emptyObj, 0))((obj, co) => {
       val o = Geom.floorObj(co._1, 0, co._2, _width, _height, obj._2)
@@ -241,6 +241,7 @@ class Maze(_width:Int, _height:Int, _shuf:Double, _rooms:Int, _roomSize:Int, _ro
     (floors._1, walls._1)
   }
   
+  //get a set of walls based on a list of floors
   def getWalls(f:Floors):Walls = {
     (0 to (_height)-1).toList.foldLeft(List[Coord]())((l, r) => {
         (0 to (_width)-1).toList.foldLeft(l)((l, c) => {
