@@ -22,9 +22,10 @@ This project is being developed in conjunction with another project (no repo yet
 Running this project
 ------
 The project can be run from the command line using sbt. In the "src" directory, type:
-`sbt "run *a b c d e f g*`
+`sbt "run a b c d e f g"`
 
-Note there are **seven** command line arguments to input. Excluding a single argument will break the program. 
+Note there are **seven** command line arguments to provide. Excluding a single argument will break the program. 
+
 *Perhaps I should make this more user friendly?*
 
 ######Command Line Arguments
@@ -63,6 +64,7 @@ With a list of Regions, the generator then works on connecting the regions. It s
 
 ####Trimming dead-ends
 At this point, we have fully connected maze with lots of big rooms and dead-ends. We could stop here, and in fact if the relevant argument is 0, the generator *will* stop here; however, we can make the maze look a bit neater if we trim a few of the dead-ends. In fact, if the provided argument is high enough, the generator will remove *all* dead ends, and the maze will then be a series of rooms with connecting corridors, nothing else inbetween.
+
 The process for trimming the dead-ends is easy. It finds a floor with 3 surrounding walls, and removes it. It will do this X times (X being the command-line argument), or until there are no more eligible floors to remove.
 
 ####And we're done!
@@ -71,7 +73,9 @@ After trimming the dead-ends, the maze is generated and complete. At this point,
 .obj File
 ------
 For an explanation of how .obj files are formatted, visit [the wikipedia article](https://en.wikipedia.org/wiki/Wavefront_.obj_file).
+
 The .obj files this project produces is a series of vertex ("v"), texture ("vt"), and normal ("vn") vectors, followed by the polygonal face elements ("f").
+
 ######Possible improvements/optimiaztions
 This project generates whole cubes for every wall space. This will produce several quads directly next to each other, and therefore never actually be seen or rendered necessarily. This is quite inefficient. I plan to make the project only output geometry for walls that border the floors.
 
@@ -84,10 +88,9 @@ The output .mdf file format goes like this:
 
 ######Possible improvements
 I recognize that this file format is pretty clearly a quick-and-dirty, and perhaps naive approach to things. I don't know the best approach to collision detection, unfortunately. Until I do, this will have to suffice.
+
 *There will be more to this file as things develop further, such as starting and ending points.*
 
 Contact
 ------
-Any questions or comments, please email me at [erich.newey@gmail.com](mailto:erich.newey@gmail.com)
-
-#Cheers!
+I love answering questions and taking comments. Please email me: erich.newey *at* gmail *dot* com
