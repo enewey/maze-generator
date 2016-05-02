@@ -74,9 +74,9 @@ The process for trimming the dead-ends is easy. It finds a floor with 3 surround
 Now that our maze is *almost* done, we need to decide on a starting and ending point in the maze. The strategy used here is not really all that complicated. 
 1. For the starting point, we pick a floor at random.
 2. For the ending point, it gets a little more involved.
-...* First, we define all eligible ending points as floors with a neighboring floor on all sides.
-...* When we have our eligible points, we sort the list of points by how far away they are from the starting point. This is done by using the cartesian distance formula, not through any traversal algorithm. I just wanted the start and end to *look* far away from each other, more than anything else.
-...* Lastly, we cut the list of eligible points in half, selecting the farthest points away, and then pick a point at random from those points.
+    * First, we define all eligible ending points as floors with a neighboring floor on all sides.
+    * When we have our eligible points, we sort the list of points by how far away they are from the starting point. This is done by using the cartesian distance formula, not through any traversal algorithm. I just wanted the start and end to *look* far away from each other, more than anything else.
+    * Lastly, we cut the list of eligible points in half, selecting the farthest points away, and then pick a point at random from those points.
 
 With this, we should have a starting and ending point for our maze that, while maybe not super complicated, will at least be aesthetically pleasing (which has been the driving force behind almost the entirety of this project if I'm being honest)
 
