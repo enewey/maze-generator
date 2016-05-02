@@ -70,6 +70,16 @@ At this point, we have fully connected maze with lots of big rooms and dead-ends
 
 The process for trimming the dead-ends is easy. It finds a floor with 3 surrounding walls, and removes it. It will do this X times (X being the command-line argument), or until there are no more eligible floors to remove.
 
+####Picking a start and end point
+Now that our maze is *almost* done, we need to decide on a starting and ending point in the maze. The strategy used here is not really all that complicated. 
+1. For the starting point, we pick a floor at random.
+2. For the ending point, it gets a little more involved.
+...* First, we define all eligible ending points as floors with a neighboring floor on all sides.
+...* When we have our eligible points, we sort the list of points by how far away they are from the starting point. This is done by using the cartesian distance formula, not through any traversal algorithm. I just wanted the start and end to *look* far away from each other, more than anything else.
+...* Lastly, we cut the list of eligible points in half, selecting the farthest points away, and then pick a point at random from those points.
+
+With this, we should have a starting and ending point for our maze that, while maybe not super complicated, will at least be aesthetically pleasing (which has been the driving force behind almost the entirety of this project if I'm being honest)
+
 ####And we're done!
 After trimming the dead-ends, the maze is generated and complete. At this point, the program will output a unicode representation of the maze to the terminal, and wait for user input. Pressing any key will output the generated maze as 3D geometry into two .obj files: one for floors, and one for walls. The maze will also output a **.mdf** file, which is a file containing data to be used for game logic.
 
@@ -86,13 +96,14 @@ This project generates whole cubes for every wall space. This will produce sever
 ------
 The output .mdf file format goes like this:
 
-* The first line is two integers represent the width & height of the maze in blocks (1 block = 1 floor or wall)
+* The first line is six integers.
+...* First two integers represent the number of rows and columns in the maze
+...* Next two numbers is the row and column for the starting location
+...* Last two numbers is the row and column for the ending position
 * Every line there after is a space-separated pair of integers (row column), representing the coordinate points for each **wall** in the maze.
 
 ######Possible improvements
 I recognize that this file format is pretty clearly a quick-and-dirty, and perhaps naive approach to things. I don't know the best approach to collision detection, unfortunately. Until I do, this will have to suffice.
-
-*There will be more to this file as things develop further, such as starting and ending points.*
 
 Contact
 ------
