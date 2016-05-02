@@ -309,4 +309,22 @@ class Maze(_width:Int, _height:Int, _shuf:Double, _rooms:Int, _roomSize:Int, _ro
     List(cast(dirs(0), c), cast(dirs(1), c), cast(dirs(2), c), cast(dirs(3), c))
       .filter(d => (isValidCoord(d) && f.contains(d)))
   }
+  
+  //Test that a set of floors is fully connected
+  // The test works by picking a floor point, recursively traversing through every neighboring floor,
+  // keeping track of each floor visited. Once no neighboring floors exist, it then compares the number
+  // of visited floors against the number of floors originally passed in.
+  //If the numbers are the same, we can safely say this maze is fully connected.
+  def testConnectedness(f:Floors):Boolean = {
+    def dfs(vis:Floors, co:Coord):Floors = {
+      if (vis.contains(co)) 
+        vis
+      else
+        surroundingFloors(co, f)
+          .filter(s => !vis.contains(s))
+          .foldLeft(vis :+ co)((v, s) => dfs(v,s))
+    }
+    val d = dfs(List(), f(0))
+    d.size == f.size
+  }
 }

@@ -14,6 +14,7 @@ object Main {
     println(m.print(m.carve(paths, m.build())));
     val startEnd = m.getStartAndEnd(paths)
     println("Start: "+startEnd._1+", End: "+startEnd._2)
+    println("Connectedness test: "+m.testConnectedness(paths))
     println("Press enter to write maze to file(s)...")
     System.in.read()
     val wal = m.getWalls(paths)
