@@ -97,9 +97,9 @@ This project generates whole cubes for every wall space. This will produce sever
 The output .mdf file format goes like this:
 
 * The first line is six integers.
-..+ First two integers represent the number of rows and columns in the maze
-..+ Next two numbers is the row and column for the starting location
-..+ Last two numbers is the row and column for the ending position
+....+ First two integers represent the number of rows and columns in the maze
+....+ Next two numbers is the row and column for the starting location
+....+ Last two numbers is the row and column for the ending position
 * Every line there after is a space-separated pair of integers (row column), representing the coordinate points for each **wall** in the maze.
 
 ######Possible improvements
