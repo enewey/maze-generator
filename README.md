@@ -110,6 +110,10 @@ The output .mdf file format goes like this:
 ######Possible improvements
 I recognize that this file format is pretty clearly a quick-and-dirty, and perhaps naive approach to things. I don't know the best approach to collision detection, unfortunately. Until I do, this will have to suffice.
 
+Screenshot
+------
+![Juxtaposition of the console output with the generated mesh](maze-mesh-render.png?raw=true)
+
 Contact
 ------
 I love answering questions and taking comments. Please email me: erich.newey *at* gmail *dot* com
