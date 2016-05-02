@@ -2,8 +2,10 @@ Functional Maze Generator
 ======
 Developed in Scala for the University of Utah course CS5965 Functional Programming Studio, taught by Matt Flatt.
 For the sake of learning, the entirety of this program strictly adheres to the functional programming paradigm.
+
 > Developed alongside my maze-render project: [github link](https://github.com/enewey/maze-render)
-> Based on Bob Nystrom's dungeon generator for rogue-likes. [Blog link here](http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/)
+
+> This project based on Bob Nystrom's dungeon generator for rogue-likes. [Blog link here](http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/)
 
 Project Description
 ------
