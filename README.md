@@ -72,6 +72,7 @@ The process for trimming the dead-ends is easy. It finds a floor with 3 surround
 
 ####Picking a start and end point
 Now that our maze is *almost* done, we need to decide on a starting and ending point in the maze. The strategy used here is not really all that complicated. 
+
 1. For the starting point, we pick a floor at random.
 2. For the ending point, it gets a little more involved.
     * First, we define all eligible ending points as floors with a neighboring floor on all sides.
