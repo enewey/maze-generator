@@ -250,6 +250,20 @@ class Maze(_width:Int, _height:Int, _shuf:Double, _rooms:Int, _roomSize:Int, _ro
       })
       .filter(!f.contains(_))
   }
+  
+  def getStartAndEnd(f:Floors):(Coord, Coord) = {
+    def dist(a:Coord, b:Coord):Double = {
+      Math.sqrt(Math.pow(b._1 - a._1, 2) + Math.pow(b._2 - a._2, 2)) 
+    }
+    
+    val shuf = _rand.shuffle(f) //first shuffle the floors
+    val start = shuf(0) //take the first one (i.e. a random floor)
+    val filt = f.filter(sp => surroundingFloors(sp, f).size > 3) //eligible exits are floors in rooms (has surrounding floors)
+    val elig = filt.sortBy(s => dist(start, s)).drop(filt.size/2) //drop the exits closest to the start point for eligible exits
+    (start, 
+        if (elig.size > 0) elig(_rand.nextInt(elig.size)) //pick a random eligible exit (if there are eligible exits) 
+        else shuf(_rand.nextInt(shuf.size)))  //else, just pick a random floor for the exit (happens when there are no rooms probably?)
+  }
    
   //Helpers below here
   //val grid = build(_width, _height, Array())
@@ -281,9 +295,10 @@ class Maze(_width:Int, _height:Int, _shuf:Double, _rooms:Int, _roomSize:Int, _ro
   def print(g:Grid) = g.foldLeft("")((s, r) => s + "\n" + r.foldLeft("")((st, sp) => st + (if (sp) "\u2593" else "\u2591")))
   
   //Get a string representation of all walls, represented as coordinates
-  // The first two numbers in the string are the x/y width/height of the maze.
-  def dataString(wa:Walls, w:Int, h:Int):String = {
-    wa.foldLeft(w+" "+h)((str, sp) => {
+  // The first two numbers in the string are the x/y width/height of the maze,
+  //   the next two are the starting point in the maze, and the next two is the exit for the maze.
+  def dataString(startEnd:(Coord, Coord), wa:Walls, w:Int, h:Int):String = {
+    wa.foldLeft(w+" "+h+"\n"+startEnd._1._1+" "+startEnd._1._2+"\n"+startEnd._2._1+" "+startEnd._2._2)((str, sp) => {
       str + "\n" + sp._1 + " " + sp._2 
     })
   }

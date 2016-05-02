@@ -12,12 +12,14 @@ object Main {
     
     val paths = m.generate();
     println(m.print(m.carve(paths, m.build())));
+    val startEnd = m.getStartAndEnd(paths)
+    println("Start: "+startEnd._1+", End: "+startEnd._2)
     println("Press enter to write maze to file(s)...")
     System.in.read()
     val wal = m.getWalls(paths)
     
     val ww = new PrintWriter(new File("walls.mdf"))
-    ww.write(m.dataString(wal, width, height))
+    ww.write(m.dataString(startEnd, wal, width, height))
     ww.close
     
     val mesh = m.getMesh(paths, wal)
