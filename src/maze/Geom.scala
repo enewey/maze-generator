@@ -17,7 +17,7 @@ object Geom {
   //Uses the passed-in coordinates as the bottom-left-nearside corner
   // Coords are from -1 to 1
   //Return value is (geometry, normals, texture coords)
-  def cubeObj(xin:Int, yin:Int, zin:Int, wi:Int, he:Int, face:Int): Obj = {
+  def cubeObj(xin:Int, yin:Int, zin:Int, wi:Int, he:Int, face:Int, excludes:List[Boolean]): Obj = {
     val x = (xin*2) - (wi)
     val y = yin*2 
     val z = zin*2 - (he)
@@ -46,29 +46,58 @@ object Geom {
     val uvs = List(t0, t1, t2, t3)
     val normals = List(n0, n1, n2, n3, n4, n5)
     
-    //vertex/uv/normal
-    val faces = List(((1,1,1), (2,2,1), (3,3,1)), //front
-                     ((3,3,1), (4,4,1), (1,1,1)),
+    
+    val topf   = List(((4,1,2), (3,2,2), (7,3,2)), //top
+                      ((7,3,2), (8,4,2), (4,1,2)))
+    val backf  = List(((6,1,3), (5,2,3), (8,3,3)), //back 0
+                      ((8,3,3), (7,4,3), (6,1,3)))
+    val rightf = List(((2,1,6), (6,2,6), (7,3,6)), //right 1
+                      ((7,3,6), (3,4,6), (2,1,6)))
+    val frontf = List(((1,1,1), (2,2,1), (3,3,1)), //front 2
+                      ((3,3,1), (4,4,1), (1,1,1)))
+    val leftf  = List(((5,1,4), (1,2,4), (4,3,4)), //left 3
+                      ((4,3,4), (8,4,4), (5,1,4)))
+    val botf   = List(((6,2,5), (2,3,5), (1,4,5)), //bottom
+                      ((1,4,5), (5,1,5), (6,2,5)))
+    
                      
-                     ((4,1,2), (3,2,2), (7,3,2)), //top
-                     ((7,3,2), (8,4,2), (4,1,2)),
-                     
-                     ((6,1,3), (5,2,3), (8,3,3)), //back
-                     ((8,3,3), (7,4,3), (6,1,3)),
-                     
-                     ((5,1,4), (1,2,4), (4,3,4)), //left
-                     ((4,3,4), (8,4,4), (5,1,4)),
-                     
-                     ((6,2,5), (2,3,5), (1,4,5)), //bottom
-                     ((1,4,5), (5,1,5), (6,2,5)),
-                     
-                     ((2,1,6), (6,2,6), (7,3,6)), //right
-                     ((7,3,6), (3,4,6), (2,1,6)))
-                     .map(f => {
+    val faces = {List() ++
+              topf ++
+              botf ++
+              {if (!excludes(0)) leftf else List()} ++
+              {if (!excludes(1)) frontf else List()} ++
+              {if (!excludes(2)) rightf else List()} ++
+              {if (!excludes(3)) backf else List()}}
+              .map(f => {
                        ((f._1._1+(face*8),f._1._2+(face*4),f._1._3+(face*6)),
                         (f._2._1+(face*8),f._2._2+(face*4),f._2._3+(face*6)),
                         (f._3._1+(face*8),f._3._2+(face*4),f._3._3+(face*6)))
                      })
+    
+    
+    //vertex/uv/normal
+//    val faces = List(((1,1,1), (2,2,1), (3,3,1)), //front
+//                     ((3,3,1), (4,4,1), (1,1,1)),
+//                     
+//                     ((4,1,2), (3,2,2), (7,3,2)), //top
+//                     ((7,3,2), (8,4,2), (4,1,2)),
+//                     
+//                     ((6,1,3), (5,2,3), (8,3,3)), //back
+//                     ((8,3,3), (7,4,3), (6,1,3)),
+//                     
+//                     ((5,1,4), (1,2,4), (4,3,4)), //left
+//                     ((4,3,4), (8,4,4), (5,1,4)),
+//                     
+//                     ((6,2,5), (2,3,5), (1,4,5)), //bottom
+//                     ((1,4,5), (5,1,5), (6,2,5)),
+//                     
+//                     ((2,1,6), (6,2,6), (7,3,6)), //right
+//                     ((7,3,6), (3,4,6), (2,1,6)))
+//                     .map(f => {
+//                       ((f._1._1+(face*8),f._1._2+(face*4),f._1._3+(face*6)),
+//                        (f._2._1+(face*8),f._2._2+(face*4),f._2._3+(face*6)),
+//                        (f._3._1+(face*8),f._3._2+(face*4),f._3._3+(face*6)))
+//                     })
                         
     (geometry, uvs, normals, faces)
   }

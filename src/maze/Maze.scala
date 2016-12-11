@@ -8,7 +8,7 @@ class Maze(_width:Int, _height:Int, _shuf:Double, _rooms:Int, _roomSize:Int, _ro
   type Walls = Floors //Same as floors, for the sake of clarity in the code
   type Regions = List[Floors]
   
-  val Dirs = List(0,1,2,3)
+  val Dirs = List(0,1,2,3)// up right down left
   val ErrCoord = (-1, -1)
   
   val _rand = scala.util.Random
@@ -234,7 +234,7 @@ class Maze(_width:Int, _height:Int, _shuf:Double, _rooms:Int, _roomSize:Int, _ro
     })
     
     val walls = wa.foldLeft((Geom.emptyObj, 0))((obj, co) => {
-      val o = Geom.cubeObj(co._1, 0, co._2, _width, _height, obj._2)
+      val o = Geom.cubeObj(co._1, 0, co._2, _width, _height, obj._2, excludeWalls(co, wa))
       ((obj._1._1 ++ o._1, obj._1._2 ++ o._2, obj._1._3 ++ o._3, obj._1._4 ++ o._4), obj._2+1)
     })
     
@@ -308,6 +308,11 @@ class Maze(_width:Int, _height:Int, _shuf:Double, _rooms:Int, _roomSize:Int, _ro
     val dirs = List(0,1,2,3);
     List(cast(dirs(0), c), cast(dirs(1), c), cast(dirs(2), c), cast(dirs(3), c))
       .filter(d => (isValidCoord(d) && f.contains(d)))
+  }
+  
+  //Gets a list of walls to exclude for face culling geometry data
+  def excludeWalls(c:Coord, w:Walls):List[Boolean] = {
+    List(0,1,2,3).map(d => cast(d, c)).map(d => w.contains(d))
   }
   
   //Test that a set of floors is fully connected
