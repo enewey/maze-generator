@@ -7,6 +7,28 @@ For the sake of learning, the entirety of this program strictly adheres to the f
 
 > This project based on Bob Nystrom's dungeon generator for rogue-likes. [Blog link here](http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/)
 
+
+Running this project
+------
+The project can be run from the command line using sbt. In the "src" directory, type:
+`sbt "run a b c d e f g"`
+
+*Make sure to include the quotes in "run a b c d e f g"*
+
+Note there are **seven** command line arguments to provide. Excluding a single argument will break the program. 
+
+######Command Line Arguments
+1. Width of the maze
+2. Height of the maze
+3. How likely a corridor is to turn a corner rather than be a straight line (0 to 100). The "Winding" factor.
+4. How many rooms the maze will attempt to place.
+5. Average size of rooms
+6. Variance in room size
+7. Number of dead-end floors to remove from the maze.
+
+Example: `sbt "run 19 19 50 10 4 1 20`
+
+
 Project Description
 ------
 The goal for this project is to *randomly* generate a large, winding, maze-like dungeon with a start and end point. The maze is a series of walls and floors, where all the floors are guaranteed to be perfectly connected (i.e. every floor space is guaranteed to be accessible). The generated dungeon is then used to generate geometry, which is finally output into .obj files containing vertex, normal, and texture coordinates. These will be used to render the maze as a series of 3D walls and floors.
@@ -17,29 +39,10 @@ This dungeon should include several options to fine-tune the look and feel of th
 2. How many "rooms" to generate within the maze.
 3. How many dead-ends to leave in the maze.
 4. How "winding" the corridors within the maze are.
-... The definition of "winding" here is explained below.
+... The definition of "winding" is how likely a corridor is to turn rather than remain a straight line.
 
 ###### Rendering project
 This project is being developed in conjunction with another project (no repo yet) that will render the output object files as a first-person 3D maze users can actually traverse, with a game loop that contains actual objectives and challenges to overcome.
-
-
-Running this project
-------
-The project can be run from the command line using sbt. In the "src" directory, type:
-`sbt "run a b c d e f g"`
-
-Note there are **seven** command line arguments to provide. Excluding a single argument will break the program. 
-
-*Perhaps I should make this more user friendly?*
-
-######Command Line Arguments
-1. Width of the maze
-2. Height of the maze
-3. How likely a corridor is to turn a corner rather than be a straight line (0 to 100). The "Winding" factor.
-4. How many rooms the maze will attempt to place.
-5. Average size of rooms
-6. Variance in room size
-7. Number of dead-ends to leave in the maze.
 
 
 Generation Algorithm
@@ -92,9 +95,6 @@ After trimming the dead-ends, the maze is generated and complete. At this point,
 For an explanation of how .obj files are formatted, visit [the wikipedia article](https://en.wikipedia.org/wiki/Wavefront_.obj_file).
 
 The .obj files this project produces is a series of vertex ("v"), texture ("vt"), and normal ("vn") vectors, followed by the polygonal face elements ("f").
-
-######Possible improvements/optimiaztions
-This project generates whole cubes for every wall space. This will produce several quads directly next to each other, and therefore never actually be seen or rendered necessarily. This is quite inefficient. I plan to make the project only output geometry for walls that border the floors.
 
 .mdf File
 ------
